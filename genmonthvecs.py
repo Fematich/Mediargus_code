@@ -3,24 +3,33 @@
 @author:    Matthias Feys (matthiasfeys@gmail.com), IBCN (Ghent University)
 @date:      %date
 """
-import os, logging, sys
-sys.path.append(os.path.abspath("../dataprocessing"))
+import os, logging, sys, nltk
+#sys.path.append(os.path.abspath("../dataprocessing"))
 from dataprocessing.utils import PoorDoc
 import numpy as np
 from whoosh.index import open_dir
 from whoosh.query import DateRange
-from config import indexdir, datadir,vectordir, dociddir
+from config import indexdir, vectordir, dociddir
 from dateutil import rrule
 from datetime import datetime
 from collections import Counter
+from nltk.tokenize import word_tokenize, sent_tokenize
+from whoosh.analysis import StandardAnalyzer
+from whoosh.util.text import rcompile
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 logger=logging.getLogger("generate month-vectors")
 
+default_pattern = rcompile(r"\w+(\.?\w+)*")
+def RegexTokenizer(text):
+    for match in default_pattern.finditer(text):
+        term = match.group(0)
+        yield term.lower().encode("utf-8")
+
 def getdocvector(date,didentifier):
         doc=PoorDoc(docidentifier=didentifier,date=date)
-        text=doc.getcontent()
-        return Counter(text)
+        tokens = RegexTokenizer(doc.getcontent())
+        return Counter(tokens)
 
 def get_months(batchnumber, n_batches):
     '''
@@ -59,10 +68,10 @@ def generatevecs(month):
     fdocids=os.path.join(dociddir,'docids%s-%s'%(month[0].strftime('%Y%m%d'),month[1].strftime('%Y%m%d')))
     with open(fvectors,'w') as vecs, open(fdocids,'w') as docids:
         for doc in getdocvectors(month):
-            vc=getdocvector(date=doc['date'].strftime('%Y%m%d'),didentifier=doc['identifier'])
+            vc=getdocvector(date=int(doc['date'].strftime('%Y%m%d')),didentifier=int(doc['identifier']))
             vbody=' '.join(['%s %d'%(term, vc[term]) for term in vc ])
-            vecs.write('%s %s %s\n'%(doc['did'],doc['date'],vbody))
-            docids.write(str(doc['did'])+'\n')
+            vecs.write('%s%s %s %s\n'%(doc['date'],doc['identifier'],doc['date'],vbody))
+            docids.write(str(doc['date'])+str(doc['identifier'])+'\n')
 
 
 if __name__ == '__main__':
