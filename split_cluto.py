@@ -6,12 +6,10 @@
 
 import os, sys, logging, shutil, subprocess
 import numpy as np
-from whoosh.index import create_in, open_dir
-from whoosh.query import Term
-from whoosh.sorting import FieldFacet
+from whoosh.index import open_dir
 from config import indexdir, vectordir, sourcedir, splitdir, eventmall_dir, fbursts
 from dateutil import rrule
-from datetime import datetime, timedelta
+from datetime import datetime
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 logger=logging.getLogger("split_cluto")
@@ -80,15 +78,14 @@ def generate_matrix(month):
     fmatrix=os.path.join(sdir,'matrix')
     fdocids=os.path.join(sdir,'docids')
     fdocs=os.path.join(sdir,'docs')
-    #TODO: ALLE date-problemen oplossen: nu wordt date en id vuil verwerkt...
     with open(fvectors,'r') as vectors, open(fmatrix,'w') as matrix, open(fdocids,'w') as docids, open(fdocs,'w') as docs:
         nnz=0
         ndocs=0
         for doc in vectors:
             nb=0
             vector=doc.split()
-            date=datetime.strptime(vector[0],'%Y-%m-%d').replace(hour=0, minute=0)
-            v=[vector[i:i+2] for i in range(4, len(vector), 2)]
+            date=datetime.strptime(vector[1],'%Y%m%d').replace(hour=0, minute=0)
+            v=[vector[i:i+2] for i in range(2, len(vector), 2)]
             docscore=0            
             v_matrix=[]
             docstring=''
@@ -105,8 +102,8 @@ def generate_matrix(month):
             if len(v_matrix)>2*minlen:
                 ndocs+=1
                 nnz+=nb
-                docids.write(vector[0]+vector[1][8:]+'\n')
-                docs.write(vector[0]+vector[1][8:]+' '+docstring+'\n')
+                docids.write(vector[0]+'\n')
+                docs.write(vector[0]+' '+docstring+'\n')
                 
                 for i in range(1,len(v_matrix)+1,2):
                     v_matrix[i]=str(float(v_matrix[i])/docscore*100)
@@ -117,7 +114,7 @@ def generate_matrix(month):
     subprocess.call(bashcommand,shell=True)
     #TODO: complete the vcluster statement and copy vcluster from ...  
     nclusters=clusters * int(np.sqrt(ndocs))
-    prog = "%s/bin/vcluster %s %d -clustfile=%s -cltreefile=%s -showtree -zscores -colmodel=none -showfeatures"%(eventmall_dir, sdir+"/matrix", nclusters, sdir+"/clust", sdir+"/tree")
+    prog = "sudo %s/bin/vcluster %s %d -clustfile=%s -cltreefile=%s -showtree -zscores -colmodel=none -showfeatures"%(eventmall_dir, sdir+"/matrix", nclusters, sdir+"/clust", sdir+"/tree")
     with open(os.path.join(sdir,"features"), 'w') as fout:
         subprocess.call(prog,shell=True,stdout=fout)
 

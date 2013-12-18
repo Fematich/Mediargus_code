@@ -10,7 +10,7 @@ from whoosh.query import Term
 from whoosh.sorting import Facets
 from whoosh import sorting
 from dataprocessing import mediargus, config as data_config
-from config import fdates, fgvols, fvols, max_df_perc, min_df
+from config import fdates, fgvols, fvols, fainfo, max_df_perc, min_df
 from datetime import datetime
 import numpy as np
 
@@ -38,6 +38,12 @@ def basic_init():
                     gvols.write(str(sum(1 for _ in postings.all_ids()))+'\t')
             except Exception:
                 logger.error('datetime error!: '+str(date))
+    ###################################################################
+    ########################generate ainfo-file########################
+    if not os.path.exists(fainfo):
+        with open(fainfo,'w') as faif:
+            for _,doc in reader.iter_docs():
+                faif.write('%s %s\n'%(doc['did'],doc['date'].strftime('%Y%m%d')))
     ###################################################################
     ####################generate daily_volumes-file####################
     if not os.path.exists(fvols):
