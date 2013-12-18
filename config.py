@@ -23,6 +23,7 @@ faevents=os.path.join(envdir,'aevents')
 fterm=os.path.join(envdir,'termlist')
 fbursts=os.path.join(envdir,'bursts')
 
+eventmall_dir='/work/eventmall'
 sourcedir='/users/mfeys/data/mediargus_2011_be'
 min_df=20
 max_df_perc=0.15

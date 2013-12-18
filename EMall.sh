@@ -1,13 +1,13 @@
 #!/bin/bash
 
 DATE_CMD="date +%Y%m%d%H:%M:%S"
-sourcedir="/users/mfeys/data/event_mall"
-destdir="/work/data/event_mall"
-ENV="/work/data/event_mall"
-lines=13706
+sourcedir="/users/mfeys/data/mediargus_2011_be"
+destdir="/work/data/mediargus_2011_be"
+ENV="/work/data/mediargus_2011_be"
+#lines=13706
 padtowidth=2
 # get batchnode number
-clustersize=33
+clustersize=12
 hstnm=$(hostname)
 hostid=$(echo ${hstnm:0:18} | egrep -o '[[:digit:]]{1,2}')
 
@@ -29,7 +29,8 @@ init(){
     sudo cp "$sourcedir/gross_daily_volumes" "$destdir/gross_daily_volumes"
     #code
     sudo cp -r /users/mfeys/eventmall /work/eventmall
-    sudo cp -r /users/mfeys/EMall /work/EMall
+    sudo cp -r /users/mfeys/Mediargus_code /work/Mediargus_code
+    sudo cp -r /users/mfeys/datastore /work/datastore
 }
 mine_bursts() {
     INST="detect term bursts"
@@ -40,7 +41,7 @@ mine_bursts() {
     echo $filepath
     if [ ! -f $destdir/$fname ]
     then
-        sudo cp "$filepath" "$destdir/$fname"
+        sudo cp $filepath $destdir/$fname
     fi
     # execute the tvburst-code
     cd /work/eventmall
@@ -51,7 +52,7 @@ mine_bursts() {
     echo 'copy the data to /users/mfeys'
     filepath=$(printf "$sourcedir/bursts/$burstname/bursts.%0*d\n" $padtowidth $hostid)
     mkdir -p "$sourcedir/bursts/$burstname"
-    sudo cp "$destdir/$burstname" "$filepath"
+    sudo cp $destdir/$burstname $filepath
     echo 'DONE MINING BURSTS!!!'
     log_finish $INST
 }
@@ -75,7 +76,7 @@ cluto() {
     log_finish $INST
     # copy the new data back
     mkdir -p $sourcedir/splits/$splitname
-    sudo cp -r "$destdir/splits/*" "$sourcedir/splits/$splitname/"
+    sudo cp -r $destdir/splits/* $sourcedir/splits/$splitname/
 }
 
 merge_events() {
@@ -87,7 +88,8 @@ merge_events() {
 }
 
 ### commands to execute ###
-# use the first source of the config file as the first parameter
-source $1
-cluto
+# define the function call as the first parameter
+# use the first source of the config file as the second parameter
+source $2
+echo "Executing: $1"; $1
  

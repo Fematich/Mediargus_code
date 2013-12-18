@@ -70,8 +70,8 @@ def generatevecs(month):
         for doc in getdocvectors(month):
             vc=getdocvector(date=int(doc['date'].strftime('%Y%m%d')),didentifier=int(doc['identifier']))
             vbody=' '.join(['%s %d'%(term, vc[term]) for term in vc ])
-            vecs.write('%s%s %s %s\n'%(doc['date'],doc['identifier'],doc['date'],vbody))
-            docids.write(str(doc['date'])+str(doc['identifier'])+'\n')
+            vecs.write('%s%s %s %s\n'%(doc['date'].strftime('%Y%m%d'),doc['identifier'],doc['date'].strftime('%Y%m%d'),vbody))
+            docids.write(doc['date'].strftime('%Y%m%d')+str(doc['identifier'])+'\n')
 
 
 if __name__ == '__main__':
