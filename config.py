@@ -25,5 +25,6 @@ fbursts=os.path.join(envdir,'bursts')
 
 eventmall_dir='/work/eventmall'
 sourcedir='/users/mfeys/data/mediargus_2011_be'
+groundtruthdir='/home/mfeys/work/data/mediargus_2011_be/ground_truth'
 min_df=20
 max_df_perc=0.15

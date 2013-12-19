@@ -4,12 +4,14 @@
 @date:      Wed Dec 11 12:42:05 2013
 """
 from mongostore.mongostore import MongoStore
-import logging, subprocess, sys
-from config import fgold, fevent_index, faevents
+import logging, subprocess, sys, os
+from config import fgold, fevent_index, faevents, groundtruthdir
 from utils import *
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 logger=logging.getLogger("TODO")
+
+docformat=re.compile("#label	MED_(?P<date>\d*).zip/med(?P<id>\d*).xml	(?P<bool>.*)")
 
 def wccount(filename):
     out = subprocess.Popen(['wc', '-l', filename],
@@ -18,7 +20,18 @@ def wccount(filename):
                          ).communicate()[0]
     return int(out.partition(b' ')[0])
 
-def load_gold_events(goldpath=fgold):
+def load_gold_events(goldpath=groundtruthdir):
+    for eventf in os.listdir(goldpath):
+        with open(eventf,'r') as event:
+            truth_event=[set(),set()]
+            for line in doc:
+                match=re.match(docformat,line)
+                if match!=None:
+                    if match.group('bool')=='true':
+                        truth_event[0].add('#doc MED_%s.zip/med%s.xml'%(match.group('date'),match.group('id')))
+                    else:
+                        truth_event[1].add('#doc MED_%s.zip/med%s.xml'%(match.group('date'),match.group('id')))
+            
     event_sets=[]
     old_id=-1
     with open(goldpath,'r') as goldfile:
