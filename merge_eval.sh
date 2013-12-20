@@ -3,7 +3,7 @@
 splitsource=$1
 splitdir=/home/mfeys/work/data/mediargus_2011_be/mediargus_2011_be/splits
 splitname=$(echo $splitsource | cut -d "/" -f 8)
-ENV=/home/mfeys/work/data/mediargus_2011_be/mediargus_2011_be/
+ENV=/home/mfeys/work/data/mediargus_2011_be/mediargus_2011_be
 DATE_CMD="date +%Y%m%d%H:%M:%S"
 log_start() {
     echo -e "* `date +'%Y-%m-%d %H:%M:%S'` \tSTART\t $* @$ENV"
